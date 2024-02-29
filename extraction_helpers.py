@@ -10,13 +10,15 @@ phone_regex = re.compile(r'''(
                          (\s*(ext|x|ext.)\s*(\d{2,5}))?)''', re.VERBOSE)
 
 address_regex = re.compile(r'''(
+                           ([0-9]*[\s](S.|W.|N.|E.)*[.\s])?
                            [0-9]+
                            [\s]*
                            [a-zA-Z\s.\.\-\,\#]{0,30}
-                           (\b([A|a]venue|[A|a]ve|[C|c]ourt|[C|c]t|[S|s]treet|[S|s]t|[D|d]rive|[D|d]r|[L|l]ane|[L|l]n|[R|r]oad|[R|r]d|[B|b]lvd|[P|p]laza|[P|p]arkway|[P|p]kwy))+
+                           (\b([A|a]venue|[A|a]ve|[C|c]ourt|[C|c]t|[S|s]treet|[S|s]t|[D|d]rive|[D|d]r|[L|l]ane|[L|l]n|[R|r]oad|[R|r]d|[B|b]lvd|[P|p]laza|[P|p]arkway|[P|p]kwy))?
                            [\s]?
-                           [a-zA-Z0-9\s.\-\,\#]+
-                           [a-zA-Z0-9\s.\-\,\#]*
+                           [a-zA-Z0-9\s.\-\,\#\|]{0,20}
+                           [a-zA-Z0-9\s.\-\,\#]{0,10}
+                           [^0-9]{5}
                            [0-9]{5})''', re.VERBOSE) # ([0-9]+[\s]*[a-zA-Z\s.\-\,\#]+(\b([A|a]venue|[A|a]ve|[C|c]ourt|[C|c]t|[S|s]treet|[S|s]t|[D|d]rive|[D|d]r|[L|l]ane|[L|l]n|[R|r]oad|[R|r]d|[B|b]lvd|[P|p]laza|[P|p]arkway|[P|p]kwy))+[\s]?[a-zA-Z0-9.\-\,\#]+[a-zA-Z0-9\s.\-\,\#]*[0-9]{5})
 pobox_regex = re.compile(r'''(\b(PO|Post)+[a-zA-Z\s0-9.\-\,\#]*[0-9]{5})''', re.VERBOSE)
                          
