@@ -26,7 +26,7 @@ pobox_regex = re.compile(r'''(\b(PO|Post)+[a-zA-Z\s0-9.\-\,\#]*[0-9]{5})''', re.
 #                         [a-zA-Z0-9.-]+
 #                         (\.[a-zA-Z]{2,4}))''', re.VERBOSE)
 
-social_media_regex = re.compile(r'^(http[s])?(://)?(www.)?(facebook|instagram|twitter|tiktok|linkedin|youtube)+(.com[/in])+[/a-zA-Z0-9.\-\,\#]*$')
+social_media_regex = re.compile(r'^(http[s]?)?(://)?(www.)?(facebook|instagram|twitter|tiktok|linkedin|youtube)+(.com[/in])+[/a-zA-Z0-9.\_\-\,\#]*$', re.VERBOSE)
 
 def extract_phone(soup):
     matches = set()
@@ -50,7 +50,7 @@ def extract_address(soup):
 def extract_links(links, url):
     matches = set()
     contact_page_matches = set()
-    contact_page_regex = re.compile(fr'(http[s]://)+(www.)?({url[7:]}/)+(contact|about)+[a-zA-Z0-9.\-\,\#]*')
+    contact_page_regex = re.compile(fr'(http[s]://)+(www.)?({url[7:]}/)+[a-zA-Z0-9.\/\-\,\#]*(contact|about)+[a-zA-Z0-9.\-\,\#]*')
 
     for link in links:
         if social_media_regex.match(link):
