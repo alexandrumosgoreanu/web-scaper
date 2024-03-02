@@ -8,11 +8,11 @@ from selenium.common.exceptions import WebDriverException
 
 def create_driver():    
     options = webdriver.ChromeOptions() 
-    options.add_argument("--headless=new")                  # Set the chrome webdriver to run in headless mode for scalability
-    options.add_experimental_option("detach", True)     # Keep browser open until .quit() is called
+    # options.add_argument("--headless=new")                  # Set the chrome webdriver to run in headless mode for scalability
+    # options.add_experimental_option("detach", True)     # Keep browser open until .quit() is called
     options.add_argument("--ignore-certificate-errors") # Set up the WebDriver with options to disable images
-    # options.add_argument("--disable-proxy-certificate-handler")
-    # options.add_argument("--disable-extensions")
+    options.add_argument("--disable-proxy-certificate-handler")
+    options.add_argument("--disable-extensions")
     # options.add_argument("--disable-gpu")
     # options.add_argument("--no-sandbox")
     # options.add_argument("--disable-dev-shm-usage")
@@ -30,10 +30,10 @@ def create_driver():
     # options.add_argument("--disable-ipv6")
     # options.add_argument("--allow-http-screen-capture")
     # options.add_argument("--disable-notifications")
-    # options.add_argument("--timeout=5")
+    options.add_argument("--timeout=10")
     options.page_load_strategy = "normal"               # Wait until the ready state is complete
     driver = webdriver.Chrome(options=options)
-    driver.set_page_load_timeout(6)
+    driver.set_page_load_timeout(15)
     return driver
 
 
