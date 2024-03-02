@@ -37,7 +37,7 @@ def extract_phone(soup):
         # phone_numbers = '-'.join([prefix, groups[4], groups[6]])
         # if groups[8] != '':
                 # phone_numbers += ' x' + groups[8]            
-        matches.add(groups[0])
+        matches.add(groups[0].replace('(', '').replace(')', '').replace('-', ' ').replace('.', ' '))
 
     return list(matches)
 
