@@ -194,7 +194,7 @@ if __name__ == '__main__':
     # domains_list = ["foxtrailerservice.com", "hallmemphis.org"]
     # domains_list = ["redrhinomovers.com"]
     # domains_list = ["ccspatherapies.com"]
-
+    
     # Getting the available amount of physical threads on the cpu
     cpu_cores = multiprocessing.cpu_count()
 
@@ -211,39 +211,70 @@ if __name__ == '__main__':
 
     # for data in scraped_data:
     #     print(data)
-    # print(f'Total scraped: Phone numbers: {ph}, Addresses: {adr}, Social media links: {social}, Websites down: {down}')
-    # print(f'Statistics: Phone numbers: {round(ph/total, 1)} %, Addresses: {round(adr/total, 1)} %, Social media links: {round(social/total, 1)} %, Websites down: {round(down/total,1)} %')
-    # json_file = json.dumps(scraped_data)
-    # with open("data.json", "w") as outfile: 
-    #     outfile.write(json_file)
+    print(f'Total scraped: Phone numbers: {ph}, Addresses: {adr}, Social media links: {social}, Websites down: {down}')
+    print(f'Statistics: Phone numbers: {round(ph/total, 1)} %, Addresses: {round(adr/total, 1)} %, Social media links: {round(social/total, 1)} %, Websites down: {round(down/total,1)} %')
+    json_file = json.dumps(scraped_data)
+    with open("data.json", "w") as outfile: 
+        outfile.write(json_file)
 
-    # print(f'Processed {len(scraped_data)} domains')
-    # print(f'It took %d seconds', end - start)
+    print(f'Processed {len(scraped_data)} domains')
+    print(f'It took %d seconds', end - start)
 
-    # #_____________________________________________________________________________________
-    # #_______________________________Pushing data to ES____________________________________
-    # #_____________________________________________________________________________________
+    #_____________________________________________________________________________________
+    #_______________________________Pushing data to ES____________________________________
+    #_____________________________________________________________________________________
 
-    # es = connect_to_elastic()
-    # # for item in scraped_data:
-    # #     es.index(index = INDEX_NAME, id = item['domain'], body = item)
-
-
-    # #_____________________________________________________________________________________
-    # #_____________________________Reading company names___________________________________
-    # #_____________________________________________________________________________________
-
-    # company_list = read_company_data('./data/sample-websites-company-names.csv')
+    es = connect_to_elastic()
+    for item in scraped_data:
+        response = es.index(index = INDEX_NAME, id = item['domain'], body = item)
+        if response.get('result') != 'updated':
+            print("Index operation failed for ", item['domain'], response)
 
 
-    # for company in company_list:
-    #     keys = company.keys()
-    #     vals = company.values()
-    #     doc = {
-    #             'doc': {
-    #             }
-    #     }
-    #     for key, val in zip(keys, vals):        # wrapping the keys and values in the "doc" key 
-    #         doc['doc'][key] = (val)
+    #_____________________________________________________________________________________
+    #_____________________________Reading company names___________________________________
+    #_____________________________________________________________________________________
 
-    #     es.update(index = INDEX_NAME, id = company['domain'], body = doc)   # updating the documents by the domain id
+    company_list = read_company_data('./data/sample-websites-company-names.csv')
+
+    for company in company_list:
+        keys = company.keys()
+        vals = company.values()
+        doc = {
+                'doc': {
+                }
+        }
+        for key, val in zip(keys, vals):        # wrapping the keys and values in the "doc" key 
+            doc['doc'][key] = (val)
+
+        try: 
+            es.update(index = INDEX_NAME, id = company['domain'], body = doc)   # updating the documents by the domain id
+        except Exception as e:
+            print(e)
+
+
+    #_____________________________________________________________________________________
+    #________________________________Reading API data_____________________________________
+    #_____________________________________________________________________________________
+
+    api_data = read_api_data('./data/API-input-sample.csv')
+    
+    for item in api_data:
+        query_list = []
+        if item['input name']:
+            query_list.append(Q('match', company_all_available_names = item['input name']))
+        if item['input phone']:
+            query_list.append(Q('match', phone = item['input phone']))
+        if item['input website']:
+            query_list.append(Q('match', domain = item['input website']))
+        if item['input_facebook']:
+            query_list.append(Q('match', social_media = item['input_facebook']))
+
+        query = Search(using=es, index='website_data').query(Q('bool', should = query_list,  minimum_should_match=1))
+                                                        
+        response = query.execute()
+
+        for hit in response:
+            print(hit)
+            
+        print('\n')
