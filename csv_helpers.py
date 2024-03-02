@@ -5,14 +5,30 @@ def read_domains(file_name):
     domains = []
     with open(file_name, mode='r', newline='') as csv_file:
         data = csv.reader(csv_file)
-        line_count = 0
+        print(f'Column headers are {next(data)}')
+        
+        row_count = 0
         for row in data:
-            if line_count == 0:
-                print(f'Column names are {", ".join(row)}')
-            else:
-                # print(type("".join(row)))
-                domains.append("".join(row).replace("[","").replace("]",""))
-            line_count += 1
-            # print(f'\t{row["domain"]}')
-        print(f'Processed {line_count} lines.')
+            domains.append("".join(row).replace("[","").replace("]",""))
+            row_count += 1
+
+        print(f'Read {row_count} domains')
+
     return domains
+
+def read_company_data(file_name):
+    company_data = []
+    with open(file_name, mode='r', newline='') as csv_file:
+        data = csv.DictReader(csv_file)
+        column_headers = data.fieldnames    # reading the column headers from the first row
+        print(f'Column headers are: {data.fieldnames}')
+
+        row_count = 0
+        for row in data: 
+            row[column_headers[3]] = row[column_headers[3]].split(" | ")    # converting from string to list based on delimiter
+            company_data.append(row)
+            row_count += 1
+
+        print(f'Read {row_count} company names')
+        
+    return company_data
