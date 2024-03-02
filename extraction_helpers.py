@@ -10,9 +10,9 @@ phone_regex = re.compile(r'''(
                          (\s*(ext|x|ext.)\s*(\d{2,5}))?)''', re.VERBOSE)
 
 address_regex = re.compile(r'''(
-                           ([0-9]*[\s](S.|W.|N.|E.)*[.\s])?
-                           [0-9]+
-                           [\s]*
+                           ([0-9]{1,4}[\s](S.|W.|N.|E.)*[.\s])?
+                           [0-9]{1,5}
+                           [\s]+
                            [a-zA-Z\s.\.\-\,\#]{0,30}
                            (\b([A|a]venue|[A|a]ve|[C|c]ourt|[C|c]t|[S|s]treet|[S|s]t|[D|d]rive|[D|d]r|[L|l]ane|[L|l]n|[R|r]oad|[R|r]d|[B|b]lvd|[P|p]laza|[P|p]arkway|[P|p]kwy))?
                            [\s]?
@@ -39,7 +39,7 @@ def extract_phone(soup):
                 # phone_numbers += ' x' + groups[8]            
         matches.add(groups[0])
 
-    return matches
+    return list(matches)
 
 def extract_address(soup):
     matches = set()
@@ -48,19 +48,19 @@ def extract_address(soup):
     if len(matches) == 0:
         for groups in pobox_regex.findall(soup):
             matches.add("".join(groups[0]))
-    return matches
+    return list(matches)
 
 def extract_links(links, url):
     matches = set()
     contact_page_matches = set()
-    contact_page_regex = re.compile(fr'(http[s]://)+(www.)?({url[7:]}/)+[a-zA-Z0-9.\/\-\,\#]*(contact|about)+[a-zA-Z0-9.\-\,\#]*')
+    contact_page_regex = re.compile(fr'[\:a-zA-Z0-9.\/\-\,\#]*(contact|about)+[a-zA-Z0-9.\-\,\#]*')
 
     for link in links:
         if social_media_regex.match(link):
             matches.add(link)
         elif contact_page_regex.match(link):
             contact_page_matches.add(link)
-    return matches, contact_page_matches
+    return list(matches), list(contact_page_matches)
 
 # def extract_email(soup):
 #     matches = set()
