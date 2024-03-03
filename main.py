@@ -194,7 +194,7 @@ if __name__ == '__main__':
     for data in scraped_data:
         print(data)
     print(f'Total scraped: Phone numbers: {ph}, Addresses: {adr}, Social media links: {social}, Websites down: {down}')
-    print(f'Statistics: Phone numbers: {round(ph/total, 1)} %, Addresses: {round(adr/total, 1)} %, Social media links: {round(social/total, 1)} %, Websites down: {round(down/total,1)} %')
+    print(f'Statistics: Phone numbers: {round((ph/total)*100, 1)} %, Addresses: {round((adr/total)*100, 1)} %, Social media links: {round((social/total)*100, 1)} %, Websites down: {round((down/total)*100,1)} %')
     json_file = json.dumps(scraped_data)
 
     with open('data.json', 'w') as outfile: 
