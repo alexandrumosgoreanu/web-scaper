@@ -8,7 +8,7 @@ from selenium.common.exceptions import WebDriverException
 
 def create_driver():    
     options = webdriver.ChromeOptions() 
-    options.add_argument("--headless=new")                  # Set the chrome webdriver to run in headless mode for scalability
+    # options.add_argument("--headless=new")                  # Set the chrome webdriver to run in headless mode for scalability
     
     options.add_argument('--ignore-certificate-errors')     
     options.add_argument('--ignore-ssl-errors')
