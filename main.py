@@ -209,10 +209,10 @@ if __name__ == '__main__':
 
     es = connect_to_elastic()
     for item in scraped_data:
-        response = es.index(index = INDEX_NAME, id = item['domain'], body = item)   # using the domain as _id
-        if response.get('result') != 'updated':
-            print('Index operation failed for ', item['domain'], response)
-
+        try:
+            response = es.index(index = INDEX_NAME, id = item['domain'], body = item)   # using the domain as _id
+        except Exception as e:
+            print(e)
 
     #_____________________________________________________________________________________
     #_____________________________Reading company names___________________________________
