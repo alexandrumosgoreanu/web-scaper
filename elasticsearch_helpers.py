@@ -5,8 +5,6 @@ from elasticsearch_dsl.query import FunctionScore
 INDEX_NAME = 'website_data'
 ELASTIC_URL = 'http://localhost:9200'
 
-f = open('data_best.json')
-
 def connect_to_elastic():   
     try:
         es = Elasticsearch(ELASTIC_URL, verify_certs=False)
