@@ -12,21 +12,8 @@ from concurrent.futures import ThreadPoolExecutor, wait, as_completed
 from threading import Lock
 import multiprocessing
 from elasticsearch_helpers import *
+from api_helpers import *
 
-cpu_count = multiprocessing.cpu_count()
-# print(domains_list[1])
-
-# url = "http://" + domains_list[3]
-# print(url)
-# page = requests.get(url)                            # make request to url
-# page_html = str(page.content) 
-
-# soup = BeautifulSoup(page.content, "lxml")          # parsing with lxml for speed vs. html.parser
-
-# body = soup.find('body').get_text()
-# print(len(body))
-# if(len(body) < 10000):        # server side rendered website that needs to be accessed through selenium. TODO: find better metric to evaluate whether a site is client side rendered or not
-    # print(True)
 social = 0
 ph = 0
 adr = 0
@@ -64,7 +51,8 @@ def scrape(domains):
             total += 1
 
         try:
-            page = session.get(url, timeout=10)                            # make request to url
+            headers = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'} # some website refuse connection from non browsers
+            page = session.get(url, timeout = 10, headers = headers)                            # make request to url
             # if page.status_code != 200:
             #      raise Exception(f"Get failed for {url}")
 
@@ -188,12 +176,6 @@ if __name__ == '__main__':
 
     start = time.time()
     domains_list = read_domains('./data/sample-websites.csv')       # read domains from csv
-    # domains_list = domains_list[501:]
-    # domains_list = ["the-greenwich.com", "bostonzen.org"]
-    # domains_list = ["kelleyroadrace.com"]
-    # domains_list = ["foxtrailerservice.com", "hallmemphis.org"]
-    # domains_list = ["redrhinomovers.com"]
-    # domains_list = ["ccspatherapies.com"]
     
     # Getting the available amount of physical threads on the cpu
     cpu_cores = multiprocessing.cpu_count()
@@ -209,12 +191,13 @@ if __name__ == '__main__':
     end = time.time()
    
 
-    # for data in scraped_data:
-    #     print(data)
+    for data in scraped_data:
+        print(data)
     print(f'Total scraped: Phone numbers: {ph}, Addresses: {adr}, Social media links: {social}, Websites down: {down}')
     print(f'Statistics: Phone numbers: {round(ph/total, 1)} %, Addresses: {round(adr/total, 1)} %, Social media links: {round(social/total, 1)} %, Websites down: {round(down/total,1)} %')
     json_file = json.dumps(scraped_data)
-    with open("data.json", "w") as outfile: 
+
+    with open('data.json', 'w') as outfile: 
         outfile.write(json_file)
 
     print(f'Processed {len(scraped_data)} domains')
@@ -226,9 +209,9 @@ if __name__ == '__main__':
 
     es = connect_to_elastic()
     for item in scraped_data:
-        response = es.index(index = INDEX_NAME, id = item['domain'], body = item)
+        response = es.index(index = INDEX_NAME, id = item['domain'], body = item)   # using the domain as _id
         if response.get('result') != 'updated':
-            print("Index operation failed for ", item['domain'], response)
+            print('Index operation failed for ', item['domain'], response)
 
 
     #_____________________________________________________________________________________
@@ -254,27 +237,13 @@ if __name__ == '__main__':
 
 
     #_____________________________________________________________________________________
-    #________________________________Reading API data_____________________________________
+    #___________________________Reading& querying API data________________________________
     #_____________________________________________________________________________________
 
     api_data = read_api_data('./data/API-input-sample.csv')
     
     for item in api_data:
-        query_list = []
-        if item['input name']:
-            query_list.append(Q('match', company_all_available_names = item['input name']))
-        if item['input phone']:
-            query_list.append(Q('match', phone = item['input phone']))
-        if item['input website']:
-            query_list.append(Q('match', domain = item['input website']))
-        if item['input_facebook']:
-            query_list.append(Q('match', social_media = item['input_facebook']))
-
-        query = Search(using=es, index='website_data').query(Q('bool', should = query_list,  minimum_should_match=1))
-                                                        
-        response = query.execute()
-
-        for hit in response:
-            print(hit)
-            
-        print('\n')
+        response = query_company_data(es, item)
+        print(response['hits']['hits'][0]['_source'], response['hits']['hits'][0]['_score'])
+    app = create_api(es) 
+    app.run(debug=True)
