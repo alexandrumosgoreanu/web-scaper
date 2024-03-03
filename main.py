@@ -44,19 +44,19 @@ def scrape(domains):
     session.trust_env = False
     
     for domain in domains:
-        url = "http://" + domain
+        url = 'http://' + domain
         client_rendered = False
         with total_lock:
-            print(f"{total} : {url}", flush=True)
+            print(f'{total} : {url}', flush=True)
             total += 1
 
         try:
             headers = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'} # some website refuse connection from non browsers
             page = session.get(url, timeout = 10, headers = headers)                            # make request to url
             # if page.status_code != 200:
-            #      raise Exception(f"Get failed for {url}")
+            #      raise Exception(f'Get failed for {url}')
 
-            soup = BeautifulSoup(page.content, "lxml")          # parsing with lxml for speed vs. html.parser
+            soup = BeautifulSoup(page.content, 'lxml')          # parsing with lxml for speed vs. html.parser
             body = soup.find('body')
             if body:
                 body = body.get_text()
@@ -64,26 +64,26 @@ def scrape(domains):
             # Checking if a website is dynamically rendered or not
             if (body and len(body) < 500) or body == None:        # server side rendered website that needs to be accessed through selenium. TODO: find better metric to evaluate whether a site is client side rendered or not
                 client_rendered = True
-                print(f"_________{url} is client side rendered_____________")
+                print(f'_________{url} is client side rendered_____________')
                 try:
                     driver.get(url)
-                    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+                    driver.execute_script('window.scrollTo(0, document.body.scrollHeight);')
                     rendered_html = driver.page_source
-                    soup = BeautifulSoup(rendered_html, "lxml")
+                    soup = BeautifulSoup(rendered_html, 'lxml')
                 except Exception as e:
                     print(e)
                     # continue
         except Exception as e:
             print(e)
             with down_lock:
-                print("______________Warning: " + url + " is down_______________", flush=True)
+                print('______________Warning: ' + url + ' is down_______________', flush=True)
                 down += 1
             with scraped_data_lock:
                 website_data = {
-                    "domain": domain,
-                    "phone": "n/a",
-                    "address": "n/a",
-                    "social_media": "n/a"
+                    'domain': domain,
+                    'phone': 'n/a',
+                    'address': 'n/a',
+                    'social_media': 'n/a'
                 }
                 scraped_data.append(website_data)
             continue
@@ -91,8 +91,8 @@ def scrape(domains):
 
         links = [link['href'] for link in soup.find_all('a', href = True)]           # getting all the links before extracting just the text from the bs object
 
-        soup_text = soup.get_text(" ", strip=True)           # converting to text in order to match phone and address
-        soup_text = soup_text.replace("\n", " ").replace("\t", " ").replace("\t", "") 
+        soup_text = soup.get_text(' ', strip=True)           # converting to text in order to match phone and address
+        soup_text = soup_text.replace('\n', ' ').replace('\t', ' ').replace('\t', '') 
 
         social_media, contact_pages = extract_links(links, url)
         phone = extract_phone(soup_text)
@@ -115,21 +115,21 @@ def scrape(domains):
                 if client_rendered == False:
                     try:
                         page = session.get(page, timeout=10)                            # make request to url
-                        soup = BeautifulSoup(page.content, "lxml")
+                        soup = BeautifulSoup(page.content, 'lxml')
                     except Exception as e:
                         print(e)
                         continue
                 else:
                     try:
                         driver.get(page)
-                        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+                        driver.execute_script('window.scrollTo(0, document.body.scrollHeight);')
                         rendered_html = driver.page_source
-                        soup = BeautifulSoup(rendered_html, "lxml")
+                        soup = BeautifulSoup(rendered_html, 'lxml')
                     except Exception as e:
                         print(e)
                         continue
-                soup_text = soup.get_text(" ", strip=True)           # converting to text in order to match phone and address
-                soup_text = soup_text.replace("\n", " ").replace("\t", " ").replace("\t", "")
+                soup_text = soup.get_text(' ', strip=True)           # converting to text in order to match phone and address
+                soup_text = soup_text.replace('\n', ' ').replace('\t', ' ').replace('\t', '')
 
                 social_media, contact_pages = extract_links(links, url)
                 phone = extract_phone(soup_text)
@@ -149,16 +149,16 @@ def scrape(domains):
         # Saving data in a dict
         with scraped_data_lock:
             website_data = {
-                "domain": domain,
-                "phone": phone or "",
-                "address": address or "",
-                "social_media": social_media or "",
-                # "contact_page": contact_pages or ""
+                'domain': domain,
+                'phone': phone or '',
+                'address': address or '',
+                'social_media': social_media or '',
+                # 'contact_page': contact_pages or ''
             }
             scraped_data.append(website_data)
 
-        print(url + " is done_______________________________________________________________", flush=True)
-    # with open('soup.txt', 'w', encoding="utf-8") as f:
+        print(url + ' is done_______________________________________________________________', flush=True)
+    # with open('soup.txt', 'w', encoding='utf-8') as f:
     #     f.write(soup.prettify())
     driver.quit()    # Closing webdriver after the whole chunk has been scraped
 
@@ -227,7 +227,7 @@ if __name__ == '__main__':
                 'doc': {
                 }
         }
-        for key, val in zip(keys, vals):        # wrapping the keys and values in the "doc" key 
+        for key, val in zip(keys, vals):        # wrapping the keys and values in the 'doc' key 
             doc['doc'][key] = (val)
 
         try: 
